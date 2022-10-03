@@ -1,0 +1,3 @@
+cd bin
+./Ellie
+cd ../

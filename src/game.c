@@ -15,3 +15,8 @@ void GameExit()
 {
 
 }
+
+void GameResize(u32 Width, u32 Height)
+{
+    
+}

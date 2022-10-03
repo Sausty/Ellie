@@ -6,6 +6,9 @@
 #include <sys/time.h>
 #include <string.h>
 
+#include <GL/glx.h>
+#include <GL/gl.h>
+
 #include <stdio.h>
 
 #include "common.h"
@@ -18,6 +21,7 @@ typedef struct x11_state {
     xcb_screen_t* Screen;
     xcb_atom_t Protocols;
     xcb_atom_t Delete;
+    GLXContext Context;
 } x11_state;
 
 internal x11_state State;
@@ -56,6 +60,52 @@ int main()
     }
     State.Screen = Iterator.data;
 
+    // Generate OpenGL context
+    i32 Attribs[] =
+    {
+        GLX_X_RENDERABLE, true,
+        GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
+        GLX_RENDER_TYPE, GLX_RGBA_BIT,
+        GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR,
+        GLX_RED_SIZE, 8,
+        GLX_GREEN_SIZE, 8,
+        GLX_BLUE_SIZE, 8,
+        GLX_ALPHA_SIZE, 8,
+        GLX_DEPTH_SIZE, 24,
+        GLX_STENCIL_SIZE, 8,
+        GLX_DOUBLEBUFFER, true,
+        //GLX_SAMPLE_BUFFERS  , 1,                                                                                                                                                            
+        //GLX_SAMPLES         , 4,                                                                                                                                                            
+        None
+    };
+
+    GLXFBConfig* FramebufferConfig = NULL;
+    i32 NumConfigs = 0;
+    FramebufferConfig = glXChooseFBConfig(State.Display, Screen, Attribs, &NumConfigs);
+    if (!FramebufferConfig || NumConfigs == 0)
+    {
+        printf("Failed to get GLX config!");
+        XAutoRepeatOn(State.Display);
+        XCloseDisplay(State.Display);
+        return -1;
+    }
+
+    i32 VisualID = 0;
+    GLXFBConfig Config = FramebufferConfig[0];
+    glXGetFBConfigAttrib(State.Display, Config, GLX_VISUAL_ID, &VisualID);
+
+    State.Context = glXCreateNewContext(State.Display, Config, GLX_RGBA_TYPE, 0, true);
+    if (!State.Context)
+    {
+        printf("Failed to create GLX context!");
+        XAutoRepeatOn(State.Display);
+        XCloseDisplay(State.Display);
+        return -1;
+    }
+
+    xcb_colormap_t Colormap = xcb_generate_id(State.Connection);
+    xcb_create_colormap(State.Connection, XCB_COLORMAP_ALLOC_NONE, Colormap, State.Screen->root, VisualID);
+    
     // Generate window
     State.Window = xcb_generate_id(State.Connection);
 
@@ -70,8 +120,24 @@ int main()
     u32 ValueList[] = { State.Screen->black_pixel, EventListeners };
     
     // Create the window
-    xcb_create_window(State.Connection, XCB_COPY_FROM_PARENT, State.Window, State.Screen->root, 0, 0, 1280, 720, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, State.Screen->root_visual, EventMask, ValueList);
+    xcb_create_window(State.Connection, XCB_COPY_FROM_PARENT, State.Window, State.Screen->root, 0, 0, 1280, 720, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, VisualID, EventMask, ValueList);
+    GLXWindow GLWindow = glXCreateWindow(State.Display, Config, State.Window, 0);
+    if (!GLWindow)
+    {
+        printf("Failed to create GLX window!\n");
+        glXDestroyContext(State.Display, State.Context);
+        XCloseDisplay(State.Display);
+        return -1;
+    }
 
+    if (!glXMakeContextCurrent(State.Display, (GLXDrawable)GLWindow, (GLXDrawable)GLWindow, State.Context))
+    {
+        xcb_destroy_window(State.Connection, State.Window);
+        glXDestroyContext(State.Display, State.Context);
+        XCloseDisplay(State.Display);
+        return -1;
+    }
+    
     // Change the title
     xcb_change_property(State.Connection, XCB_PROP_MODE_REPLACE, State.Window, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, 5, "Ellie");
 
@@ -120,6 +186,12 @@ int main()
                     Quit = true;
                 }
             } break;
+            case XCB_CONFIGURE_NOTIFY:
+            {
+                xcb_configure_notify_event_t* ConfigureEvent = (xcb_configure_notify_event_t*)Event;
+
+                GameResize(ConfigureEvent->width, ConfigureEvent->height);
+            } break;
             default:
             {
                 break;
@@ -129,12 +201,19 @@ int main()
 
         // Update the game
         GameUpdate(0.0f);
+
+        // Render
+        glClear(GL_COLOR_BUFFER_BIT);
+        glClearColor(0.2f, 0.5f, 0.4f, 1.0f);
+        glXSwapBuffers(State.Display, (GLXDrawable)GLWindow);
     }
     
     // Exit the game
     GameExit();
 
     // Cleanup
+    glXDestroyWindow(State.Display, GLWindow);
+    glXDestroyContext(State.Display, State.Context);
     xcb_destroy_window(State.Connection, State.Window);
     XCloseDisplay(State.Display);
     printf("Successfully exited the program.\n");

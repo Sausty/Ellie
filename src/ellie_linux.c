@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include <string.h>
 #include <stdlib.h>
+#include <HandmadeMath.h>
 
 #include <GL/glx.h>
 #include "ellie_gl.h"
@@ -27,9 +28,19 @@ typedef struct x11_state {
 
     u32 Width;
     u32 Height;
+
+    u32 MouseX;
+    u32 MouseY;
+
+    b8 MouseButtons[MouseButton_Max];
 } x11_state;
 
 internal x11_state State;
+
+b8 IsMouseButtonPressed(mouse_button Button)
+{
+    return State.MouseButtons[Button];
+}
 
 char* ReadFile(const char* Path, i32* OutputSize)
 {
@@ -51,6 +62,11 @@ char* ReadFile(const char* Path, i32* OutputSize)
     Buffer[Size] = '\0';
     *OutputSize = Size;
     return Buffer;
+}
+
+hmm_vec2 GetMousePosition()
+{
+    return HMM_Vec2(State.MouseX, State.MouseY);
 }
 
 int main()
@@ -214,6 +230,30 @@ int main()
                     Quit = true;
                 }
             } break;
+            case XCB_BUTTON_PRESS:
+            case XCB_BUTTON_RELEASE:
+            {
+                xcb_button_press_event_t* MouseEvent = (xcb_button_press_event_t*)Event;
+                b8 Pressed = Event->response_type == XCB_BUTTON_PRESS;
+                mouse_button Button = MouseButton_Max;
+                switch (MouseEvent->detail)
+                {
+                case XCB_BUTTON_INDEX_1:
+                {
+                    Button = MouseButton_Left;
+                } break;
+                case XCB_BUTTON_INDEX_2:
+                {
+                    Button = MouseButton_Right;
+                } break;
+                case XCB_BUTTON_INDEX_3:
+                {
+                    Button = MouseButton_Middle;
+                } break;
+                }
+
+                State.MouseButtons[Button] = Pressed;
+            } break;
             case XCB_CONFIGURE_NOTIFY:
             {
                 xcb_configure_notify_event_t* ConfigureEvent = (xcb_configure_notify_event_t*)Event;
@@ -221,6 +261,13 @@ int main()
                 State.Width = ConfigureEvent->width;
                 State.Height = ConfigureEvent->height;
                 GameResize(State.Width, State.Height);
+            } break;
+            case XCB_MOTION_NOTIFY:
+            {
+                xcb_motion_notify_event_t* MoveEvent = (xcb_motion_notify_event_t*)Event;
+
+                State.MouseX = MoveEvent->event_x;
+                State.MouseY = MoveEvent->event_y;
             } break;
             default:
             {

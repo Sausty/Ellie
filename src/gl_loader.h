@@ -39,6 +39,13 @@ typedef void (*PFN_glTexParameteri)(GLenum target, GLenum parameter, GLenum valu
 typedef void (*PFN_glTexImage2D)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const void* data);
 typedef void (*PFN_glGenerateMipmap)(GLenum target);
 typedef void (*PFN_glDeleteTextures)(GLint n, GLuint* textures);
+typedef u32 (*PFN_glGetUniformLocation)(GLuint program, const GLchar* name);
+typedef void (*PFN_glUniform1i)(GLint location, i32 value);
+typedef void (*PFN_glUniform1f)(GLint location, f32 value);
+typedef void (*PFN_glUniform2f)(GLint location, f32 x, f32 y);
+typedef void (*PFN_glUniform3f)(GLint location, f32 x, f32 y, f32 z);
+typedef void (*PFN_glUniform4f)(GLint location, f32 x, f32 y, f32 z, f32 w);
+typedef void (*PFN_glUniformMatrix4fv)(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
 
 typedef struct gl_state {
     PFN_glViewport Viewport;
@@ -75,6 +82,13 @@ typedef struct gl_state {
     PFN_glTexImage2D TexImage2D;
     PFN_glGenerateMipmap GenerateMipmap;
     PFN_glDeleteTextures DeleteTextures;
+    PFN_glGetUniformLocation GetUniformLocation;
+    PFN_glUniform1i Uniform1i;
+    PFN_glUniform1f Uniform1f;
+    PFN_glUniform2f Uniform2f;
+    PFN_glUniform3f Uniform3f;
+    PFN_glUniform4f Uniform4f;
+    PFN_glUniformMatrix4fv UniformMatrix4fv;
 } gl_state;
 
 extern gl_state gl;

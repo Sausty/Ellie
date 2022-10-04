@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+#include <HandmadeMath.h>
+
 // TODO(milo): Shader uniforms with HandmadeMath
 // TODO(milo): Textures
 
@@ -32,6 +34,12 @@ void RHIBufferBind(rhi_buffer* Buffer);
 void RHIShaderInit(rhi_shader* Shader, const char* Vertex, const char* Fragment);
 void RHIShaderFree(rhi_shader* Shader);
 void RHIShaderBind(rhi_shader* Shader);
+void RHIShaderUniformInt(rhi_shader* Shader, const char* Uniform, i32 Value);
+void RHIShaderUniformFloat(rhi_shader* Shader, const char* Uniform, f32 Value);
+void RHIShaderUniformVec2(rhi_shader* Shader, const char* Uniform, hmm_vec2 Value);
+void RHIShaderUniformVec3(rhi_shader* Shader, const char* Uniform, hmm_vec3 Value);
+void RHIShaderUniformVec4(rhi_shader* Shader, const char* Uniform, hmm_vec4 Value);
+void RHIShaderUniformMat4(rhi_shader* Shader, const char* Uniform, hmm_mat4 Value);
 
 void RHIInputLayoutInit(rhi_input_layout* InputLayout);
 void RHIInputLayoutFree(rhi_input_layout* InputLayout);

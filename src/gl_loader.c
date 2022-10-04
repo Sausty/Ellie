@@ -46,7 +46,14 @@ void LoadGL()
     gl.TexImage2D = dlsym(GLLibrary, "glTexImage2D");
     gl.GenerateMipmap = dlsym(GLLibrary, "glGenerateMipmap");
     gl.DeleteTextures = dlsym(GLLibrary, "glDeleteTextures");
-
+    gl.GetUniformLocation = dlsym(GLLibrary, "glGetUniformLocation");
+    gl.Uniform1i = dlsym(GLLibrary, "glUniform1i");
+    gl.Uniform1f = dlsym(GLLibrary, "glUniform1f");
+    gl.Uniform2f = dlsym(GLLibrary, "glUniform2f");
+    gl.Uniform3f = dlsym(GLLibrary, "glUniform3f");
+    gl.Uniform4f = dlsym(GLLibrary, "glUniform4f");
+    gl.UniformMatrix4fv = dlsym(GLLibrary, "glUniformMatrix4fv");
+    
     assert(gl.Viewport);
     assert(gl.Clear);
     assert(gl.ClearColor);
@@ -81,6 +88,13 @@ void LoadGL()
     assert(gl.TexImage2D);
     assert(gl.GenerateMipmap);
     assert(gl.DeleteTextures);
+    assert(gl.GetUniformLocation);
+    assert(gl.Uniform1i);
+    assert(gl.Uniform1f);
+    assert(gl.Uniform2f);
+    assert(gl.Uniform3f);
+    assert(gl.Uniform4f);
+    assert(gl.UniformMatrix4fv);
     
     printf("Loaded libGL.so and the following functions:\n");
     printf("\t- glViewport\n");
@@ -117,6 +131,13 @@ void LoadGL()
     printf("\t- glTexImage2D\n");
     printf("\t- glGenerateMipmap\n");
     printf("\t- glDeleteTextures\n");
+    printf("\t- glGetUniformLocation\n");
+    printf("\t- glUniform1i\n");
+    printf("\t- glUniform1f\n");
+    printf("\t- glUniform2f\n");
+    printf("\t- glUniform3f\n");
+    printf("\t- glUniform4f\n");
+    printf("\t- glUniformMatrix4fv\n");
 }
 
 void FreeGL()

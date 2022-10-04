@@ -8,7 +8,7 @@ mkdir -p bin
 cFilenames=$(find . -type f -name "*.c")
 
 assembly="Ellie"
-compilerFlags="-g -fPIC"
+compilerFlags="-g -fPIC -Iext"
 linkerFlags="-lX11 -lX11-xcb -lxcb -lGL -lGLX -L/usr/X11R6/lib"
 defines="-D_DEBUG"
 

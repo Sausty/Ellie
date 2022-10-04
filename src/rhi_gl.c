@@ -115,6 +115,42 @@ void RHIShaderBind(rhi_shader* Shader)
     gl.UseProgram(Shader->Handle);
 }
 
+void RHIShaderUniformInt(rhi_shader* Shader, const char* Uniform, i32 Value)
+{
+    u32 Location = gl.GetUniformLocation(Shader->Handle, Uniform);
+    gl.Uniform1i(Location, Value);
+}
+
+void RHIShaderUniformFloat(rhi_shader* Shader, const char* Uniform, f32 Value)
+{
+    u32 Location = gl.GetUniformLocation(Shader->Handle, Uniform);
+    gl.Uniform1f(Location, Value);
+}
+
+void RHIShaderUniformVec2(rhi_shader* Shader, const char* Uniform, hmm_vec2 Value)
+{
+    u32 Location = gl.GetUniformLocation(Shader->Handle, Uniform);
+    gl.Uniform2f(Location, Value.X, Value.Y);
+}
+
+void RHIShaderUniformVec3(rhi_shader* Shader, const char* Uniform, hmm_vec3 Value)
+{
+    u32 Location = gl.GetUniformLocation(Shader->Handle, Uniform);
+    gl.Uniform3f(Location, Value.X, Value.Y, Value.Z);
+}
+
+void RHIShaderUniformVec4(rhi_shader* Shader, const char* Uniform, hmm_vec4 Value)
+{
+    u32 Location = gl.GetUniformLocation(Shader->Handle, Uniform);
+    gl.Uniform4f(Location, Value.X, Value.Y, Value.Z, Value.W);
+}
+
+void RHIShaderUniformMat4(rhi_shader* Shader, const char* Uniform, hmm_mat4 Value)
+{
+    u32 Location = gl.GetUniformLocation(Shader->Handle, Uniform);
+    gl.UniformMatrix4fv(Location, 1, GL_FALSE, (const GLfloat*)Value.Elements);
+}
+
 void RHIInputLayoutInit(rhi_input_layout* InputLayout)
 {
     gl.GenVertexArrays(1, &InputLayout->Handle);

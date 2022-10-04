@@ -5,14 +5,16 @@
 #include <X11/Xlib-xcb.h>  // sudo apt-get install libxkbcommon-x11-dev libx11-xcb-dev
 #include <sys/time.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <GL/glx.h>
-#include <GL/gl.h>
+#include "gl_loader.h"
 
 #include <stdio.h>
 
 #include "common.h"
 #include "game.h"
+#include "platform.h"
 
 typedef struct x11_state {
     Display* Display;
@@ -22,12 +24,40 @@ typedef struct x11_state {
     xcb_atom_t Protocols;
     xcb_atom_t Delete;
     GLXContext Context;
+
+    u32 Width;
+    u32 Height;
 } x11_state;
 
 internal x11_state State;
 
+char* ReadFile(const char* Path, i32* OutputSize)
+{
+    FILE* File = fopen(Path, "r");
+    if (!File)
+    {
+        printf("Failed to open file: %s\n", Path);
+        fclose(File);
+        return NULL;
+    }
+
+    long CurrentPos = ftell(File);
+    fseek(File, 0, SEEK_END);
+    long Size = ftell(File);
+    fseek(File, CurrentPos, SEEK_SET);
+
+    char* Buffer = malloc(Size + 1);
+    fread(Buffer, Size, sizeof(char), File);
+    Buffer[Size] = '\0';
+    *OutputSize = Size;
+    return Buffer;
+}
+
 int main()
 {
+    // Load GL
+    LoadGL();
+    
     // Open the display
     State.Display = XOpenDisplay(NULL);
     if (!State.Display)
@@ -36,7 +66,7 @@ int main()
         return -1;
     }
     
-    //Turn off auto repeat
+    //Turn on auto repeat
     XAutoRepeatOn(State.Display);
     // Get connection
     State.Connection = XGetXCBConnection(State.Display);
@@ -74,9 +104,7 @@ int main()
         GLX_DEPTH_SIZE, 24,
         GLX_STENCIL_SIZE, 8,
         GLX_DOUBLEBUFFER, true,
-        //GLX_SAMPLE_BUFFERS  , 1,                                                                                                                                                            
-        //GLX_SAMPLES         , 4,                                                                                                                                                            
-        None
+        0
     };
 
     GLXFBConfig* FramebufferConfig = NULL;
@@ -162,7 +190,7 @@ int main()
         XAutoRepeatOn(State.Display);
         XCloseDisplay(State.Display);
     }
-
+    
     // Init the game
     GameInit();
 
@@ -190,7 +218,9 @@ int main()
             {
                 xcb_configure_notify_event_t* ConfigureEvent = (xcb_configure_notify_event_t*)Event;
 
-                GameResize(ConfigureEvent->width, ConfigureEvent->height);
+                State.Width = ConfigureEvent->width;
+                State.Height = ConfigureEvent->height;
+                GameResize(State.Width, State.Height);
             } break;
             default:
             {
@@ -199,12 +229,10 @@ int main()
             }
         }
 
+        gl.Viewport(0, 0, State.Width, State.Height);
         // Update the game
         GameUpdate(0.0f);
-
-        // Render
-        glClear(GL_COLOR_BUFFER_BIT);
-        glClearColor(0.2f, 0.5f, 0.4f, 1.0f);
+        
         glXSwapBuffers(State.Display, (GLXDrawable)GLWindow);
     }
     
@@ -216,6 +244,7 @@ int main()
     glXDestroyContext(State.Display, State.Context);
     xcb_destroy_window(State.Connection, State.Window);
     XCloseDisplay(State.Display);
+    FreeGL();
     printf("Successfully exited the program.\n");
     
     return 0;

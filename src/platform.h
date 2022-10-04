@@ -3,6 +3,7 @@
 
 #include "common.h"
 
-
+char* ReadFile(const char* Path, i32* OutputSize);
+f32 PlatformGetTime();
 
 #endif

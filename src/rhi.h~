@@ -1,0 +1,33 @@
+#ifndef ELLIE_RHI_GL_H
+#define ELLIE_RHI_GL_H
+
+#include "common.h"
+
+// TODO(milo): Shaders
+// TODO(milo): Vertex arrays
+// TODO(milo): Textures
+
+typedef enum rhi_buffer_usage {
+    RHIBufferUsage_Vertex,
+    RHIBufferUsage_Index
+} rhi_buffer_usage;
+
+typedef struct rhi_buffer {
+    u32 Handle;
+    rhi_buffer_usage Usage;
+} rhi_buffer;
+
+typedef struct rhi_shader {
+    u32 Handle;
+} rhi_shader;
+
+void RHIBufferInit(rhi_buffer* Buffer, rhi_buffer_usage Usage, u64 Size);
+void RHIBufferFree(rhi_buffer* Buffer);
+void RHIBufferUpload(rhi_buffer* Buffer, u64 Size, const void* Data);
+void RHIBufferBind(rhi_buffer* Buffer);
+
+void RHIShaderInit(rhi_shader* Shader, const char* Vertex, const char* Fragment);
+void RHIShaderFree(rhi_shader* Shader);
+void RHIShaderBind(rhi_shader* Shader);
+
+#endif

@@ -9,7 +9,7 @@ cFilenames=$(find . -type f -name "*.c")
 
 assembly="Ellie"
 compilerFlags="-g -fPIC -Iext"
-linkerFlags="-lX11 -lX11-xcb -lxcb -lGL -lGLX -L/usr/X11R6/lib"
+linkerFlags="-lX11 -lm -lX11-xcb -lxcb -lGL -lGLX -L/usr/X11R6/lib"
 defines="-D_DEBUG"
 
 echo "Building game..."

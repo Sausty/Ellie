@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 GLenum RHIBufferUsageToGL(rhi_buffer_usage Usage)
 {
     switch (Usage)
@@ -171,4 +174,39 @@ void RHIInputLayoutAdd(rhi_input_layout* InputLayout, i32 Index, u32 ElementCoun
     gl.BindVertexArray(InputLayout->Handle);
     gl.EnableVertexAttribArray(Index);
     gl.VertexAttribPointer(Index, ElementCount, GL_FLOAT, GL_FALSE, Stride, (void*)Offset);
+}
+
+void RHITextureLoad(rhi_texture* Texture, const char* Path)
+{
+    stbi_set_flip_vertically_on_load(true);
+    u8* Data = stbi_load(Path, &Texture->Width, &Texture->Height, &Texture->Channels, STBI_rgb_alpha);
+    if (!Data)
+    {
+        printf("Failed to load texture! %s", Path);
+        return;
+    }
+    
+    gl.GenTextures(1, &Texture->Handle);
+    gl.BindTexture(GL_TEXTURE_2D, Texture->Handle);
+
+    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    gl.TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Texture->Width, Texture->Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, Data);
+    gl.GenerateMipmap(GL_TEXTURE_2D);
+
+    free(Data);
+}
+
+void RHITextureFree(rhi_texture* Texture)
+{
+    gl.DeleteTextures(1, &Texture->Handle);
+}
+
+void RHITextureBind(rhi_texture* Texture, u32 Slot)
+{
+    gl.ActiveTexture(GL_TEXTURE0 + Slot);
+    gl.BindTexture(GL_TEXTURE_2D, Texture->Handle);
 }

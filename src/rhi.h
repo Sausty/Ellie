@@ -26,6 +26,13 @@ typedef struct rhi_input_layout {
     u32 Handle;
 } rhi_input_layout;
 
+typedef struct rhi_texture {
+    u32 Handle;
+    i32 Width;
+    i32 Height;
+    i32 Channels;
+} rhi_texture;
+
 void RHIBufferInit(rhi_buffer* Buffer, rhi_buffer_usage Usage, u64 Size);
 void RHIBufferFree(rhi_buffer* Buffer);
 void RHIBufferUpload(rhi_buffer* Buffer, u64 Size, const void* Data);
@@ -45,5 +52,9 @@ void RHIInputLayoutInit(rhi_input_layout* InputLayout);
 void RHIInputLayoutFree(rhi_input_layout* InputLayout);
 void RHIInputLayoutBind(rhi_input_layout* InputLayout);
 void RHIInputLayoutAdd(rhi_input_layout* InputLayout, i32 Index, u32 ElementCount, i64 Stride, u64 Offset);
+
+void RHITextureLoad(rhi_texture* Texture, const char* Path);
+void RHITextureFree(rhi_texture* Texture);
+void RHITextureBind(rhi_texture* Texture, u32 Slot);
 
 #endif

@@ -42,6 +42,7 @@ void LoadGL()
     gl.DrawElements = dlsym(GLLibrary, "glDrawElements");
     gl.GenTextures = dlsym(GLLibrary, "glGenTextures");
     gl.BindTexture = dlsym(GLLibrary, "glBindTexture");
+    gl.ActiveTexture = dlsym(GLLibrary, "glActiveTexture");
     gl.TexParameteri = dlsym(GLLibrary, "glTexParameteri");
     gl.TexImage2D = dlsym(GLLibrary, "glTexImage2D");
     gl.GenerateMipmap = dlsym(GLLibrary, "glGenerateMipmap");
@@ -84,6 +85,7 @@ void LoadGL()
     assert(gl.DrawElements);
     assert(gl.GenTextures);
     assert(gl.BindTexture);
+    assert(gl.ActiveTexture);
     assert(gl.TexParameteri);
     assert(gl.TexImage2D);
     assert(gl.GenerateMipmap);
@@ -127,6 +129,7 @@ void LoadGL()
     printf("\t- glDrawElements\n");
     printf("\t- glGenTextures\n");
     printf("\t- glBindTexture\n");
+    printf("\t- glActiveTexture\n");
     printf("\t- glTexParameteri\n");
     printf("\t- glTexImage2D\n");
     printf("\t- glGenerateMipmap\n");

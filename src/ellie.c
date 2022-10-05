@@ -1,6 +1,7 @@
 #include "ellie.h"
-#include "ellie_gl.h"
 #include "ellie_rhi.h"
+
+#include "glad/glad.h"
 
 typedef struct game_state {
     rhi_shader ForwardShader;
@@ -44,8 +45,8 @@ void GameInit()
 
 void GameUpdate(f32 DeltaTime)
 {
-    gl.Clear(GL_COLOR_BUFFER_BIT);
-    gl.ClearColor(0.2f, 0.3f, 0.4f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
 
     RHIShaderBind(&GameState.ForwardShader);
 
@@ -56,7 +57,7 @@ void GameUpdate(f32 DeltaTime)
     RHIBufferBind(&GameState.VertexBuffer);
     RHIBufferBind(&GameState.IndexBuffer);
 
-    gl.DrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 void GameExit()

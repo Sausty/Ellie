@@ -22,4 +22,11 @@ typedef i8 b8;
 #define false 0
 #define true 1
 
+#ifdef _WIN32
+#define ELLIE_WINDOWS
+#include <Windows.h>
+#elif defined(__linux__)
+#define ELLIE_LINUX
+#endif
+
 #endif

@@ -1,3 +1,7 @@
+#include "ellie_common.h"
+
+#ifdef ELLIE_LINUX
+
 #include <xcb/xcb.h>
 #include <X11/keysym.h>
 #include <X11/XKBlib.h>  // sudo apt-get install libx11-dev
@@ -7,13 +11,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include <HandmadeMath.h>
+#include <dlfcn.h>
 
 #include <GL/glx.h>
 #include "ellie_gl.h"
 
 #include <stdio.h>
 
-#include "ellie_common.h"
 #include "ellie.h"
 #include "ellie_platform.h"
 
@@ -37,12 +41,27 @@ typedef struct x11_state {
 
 internal x11_state State;
 
+void OpenDynamicLib(dynamic_library* Library, const char* Path)
+{
+    Library->Handle = dlsym(Path, RTLD_NOW);
+}
+
+void CloseDynamicLib(dynamic_library* Library)
+{
+    dlclose(Library->Handle);
+}
+
+void* LoadFunction(dynamic_library* Library, const char* Name)
+{
+    return dlsym(Library->Handle, Name);
+}
+
 b8 IsMouseButtonPressed(mouse_button Button)
 {
     return State.MouseButtons[Button];
 }
 
-char* ReadFile(const char* Path, i32* OutputSize)
+char* PlatformReadFile(const char* Path, i32* OutputSize)
 {
     FILE* File = fopen(Path, "r");
     if (!File)
@@ -296,3 +315,5 @@ int main()
     
     return 0;
 }
+
+#endif

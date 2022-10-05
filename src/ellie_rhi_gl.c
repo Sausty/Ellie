@@ -1,9 +1,9 @@
 #include "ellie_rhi.h"
-#include "ellie_gl.h"
 #include "ellie_platform.h"
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "glad/glad.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -23,86 +23,86 @@ void RHIBufferInit(rhi_buffer* Buffer, rhi_buffer_usage Usage, u64 size)
 {
     Buffer->Usage = Usage;
     
-    gl.GenBuffers(1, &Buffer->Handle);
-    gl.BindBuffer(RHIBufferUsageToGL(Usage), Buffer->Handle);
-    gl.BufferData(RHIBufferUsageToGL(Usage), size, NULL, GL_DYNAMIC_DRAW);
-    gl.BindBuffer(RHIBufferUsageToGL(Usage), 0);
+    glGenBuffers(1, &Buffer->Handle);
+    glBindBuffer(RHIBufferUsageToGL(Usage), Buffer->Handle);
+    glBufferData(RHIBufferUsageToGL(Usage), size, NULL, GL_DYNAMIC_DRAW);
+    glBindBuffer(RHIBufferUsageToGL(Usage), 0);
 }
 
 void RHIBufferFree(rhi_buffer* Buffer)
 {
-    gl.DeleteBuffers(1, &Buffer->Handle);
+    glDeleteBuffers(1, &Buffer->Handle);
 }
 
 void RHIBufferUpload(rhi_buffer* Buffer, u64 Size, const void* Data)
 {
-    gl.BindBuffer(RHIBufferUsageToGL(Buffer->Usage), Buffer->Handle);
-    gl.BufferSubData(RHIBufferUsageToGL(Buffer->Usage), 0, Size, Data);
+    glBindBuffer(RHIBufferUsageToGL(Buffer->Usage), Buffer->Handle);
+    glBufferSubData(RHIBufferUsageToGL(Buffer->Usage), 0, Size, Data);
 }
 
 void RHIBufferBind(rhi_buffer* Buffer)
 {
-    gl.BindBuffer(RHIBufferUsageToGL(Buffer->Usage), Buffer->Handle);
+    glBindBuffer(RHIBufferUsageToGL(Buffer->Usage), Buffer->Handle);
 }
 
 void RHIShaderInit(rhi_shader* Shader, const char* Vertex, const char* Fragment)
 {
     i32 VertexShaderSize = 0;
     i32 FragmentShaderSize = 0;
-    char* VertexSource = ReadFile(Vertex, &VertexShaderSize);
-    char* FragmentSource = ReadFile(Fragment, &FragmentShaderSize);
+    char* VertexSource = PlatformReadFile(Vertex, &VertexShaderSize);
+    char* FragmentSource = PlatformReadFile(Fragment, &FragmentShaderSize);
     
     u32 VertexShader, FragmentShader = 0;
-    VertexShader = gl.CreateShader(GL_VERTEX_SHADER);
-    gl.ShaderSource(VertexShader, 1, (const GLchar**)&VertexSource, NULL);
-    gl.CompileShader(VertexShader);
+    VertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(VertexShader, 1, (const GLchar**)&VertexSource, NULL);
+    glCompileShader(VertexShader);
     {
         i32 Success = 0;
         char InfoLog[1024] = {0};
 
-        gl.GetShaderiv(VertexShader, GL_COMPILE_STATUS, &Success);
+        glGetShaderiv(VertexShader, GL_COMPILE_STATUS, &Success);
         if (!Success)
         {
-            gl.GetShaderInfoLog(VertexShader, 1024, NULL, InfoLog);
+            glGetShaderInfoLog(VertexShader, 1024, NULL, InfoLog);
             printf("Failed to compile vertex shader!\n");
             printf("%s\n", InfoLog);
         }
     }
-    FragmentShader = gl.CreateShader(GL_FRAGMENT_SHADER);
-    gl.ShaderSource(FragmentShader, 1, (const GLchar**)&FragmentSource, NULL);
-    gl.CompileShader(FragmentShader);
+    FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(FragmentShader, 1, (const GLchar**)&FragmentSource, NULL);
+    glCompileShader(FragmentShader);
     {
         i32 Success = 0;
         char InfoLog[1024] = {0};
 
-        gl.GetShaderiv(FragmentShader, GL_COMPILE_STATUS, &Success);
+        glGetShaderiv(FragmentShader, GL_COMPILE_STATUS, &Success);
         if (!Success)
         {
-            gl.GetShaderInfoLog(FragmentShader, 1024, NULL, InfoLog);
+            glGetShaderInfoLog(FragmentShader, 1024, NULL, InfoLog);
             printf("Failed to compile fragment shader!\n");
             printf("%s\n", InfoLog);
         }
     }
 
-    Shader->Handle = gl.CreateProgram();
-    gl.AttachShader(Shader->Handle, VertexShader);
-    gl.AttachShader(Shader->Handle, FragmentShader);
-    gl.LinkProgram(Shader->Handle);
+    Shader->Handle = glCreateProgram();
+    glAttachShader(Shader->Handle, VertexShader);
+    glAttachShader(Shader->Handle, FragmentShader);
+    glLinkProgram(Shader->Handle);
     {
         i32 Success = 0;
         char InfoLog[1024] = {0};
 
-        gl.GetProgramiv(Shader->Handle, GL_LINK_STATUS, &Success);
+        glGetProgramiv(Shader->Handle, GL_LINK_STATUS, &Success);
         if (!Success)
         {
-            gl.GetProgramInfoLog(Shader->Handle, 1024, NULL, InfoLog);
+            glGetProgramInfoLog(Shader->Handle, 1024, NULL, InfoLog);
             printf("Failed to link shader program!\n");
             printf("%s\n", InfoLog);
         }
     }
 
-    gl.DeleteShader(VertexShader);
-    gl.DeleteShader(FragmentShader);
+    glDeleteShader(VertexShader);
+    glDeleteShader(FragmentShader);
 
     free(VertexSource);
     free(FragmentSource);
@@ -110,70 +110,70 @@ void RHIShaderInit(rhi_shader* Shader, const char* Vertex, const char* Fragment)
 
 void RHIShaderFree(rhi_shader* Shader)
 {
-    gl.DeleteProgram(Shader->Handle);
+    glDeleteProgram(Shader->Handle);
 }
 
 void RHIShaderBind(rhi_shader* Shader)
 {
-    gl.UseProgram(Shader->Handle);
+    glUseProgram(Shader->Handle);
 }
 
 void RHIShaderUniformInt(rhi_shader* Shader, const char* Uniform, i32 Value)
 {
-    u32 Location = gl.GetUniformLocation(Shader->Handle, Uniform);
-    gl.Uniform1i(Location, Value);
+    u32 Location = glGetUniformLocation(Shader->Handle, Uniform);
+    glUniform1i(Location, Value);
 }
 
 void RHIShaderUniformFloat(rhi_shader* Shader, const char* Uniform, f32 Value)
 {
-    u32 Location = gl.GetUniformLocation(Shader->Handle, Uniform);
-    gl.Uniform1f(Location, Value);
+    u32 Location = glGetUniformLocation(Shader->Handle, Uniform);
+    glUniform1f(Location, Value);
 }
 
 void RHIShaderUniformVec2(rhi_shader* Shader, const char* Uniform, hmm_vec2 Value)
 {
-    u32 Location = gl.GetUniformLocation(Shader->Handle, Uniform);
-    gl.Uniform2f(Location, Value.X, Value.Y);
+    u32 Location = glGetUniformLocation(Shader->Handle, Uniform);
+    glUniform2f(Location, Value.X, Value.Y);
 }
 
 void RHIShaderUniformVec3(rhi_shader* Shader, const char* Uniform, hmm_vec3 Value)
 {
-    u32 Location = gl.GetUniformLocation(Shader->Handle, Uniform);
-    gl.Uniform3f(Location, Value.X, Value.Y, Value.Z);
+    u32 Location = glGetUniformLocation(Shader->Handle, Uniform);
+    glUniform3f(Location, Value.X, Value.Y, Value.Z);
 }
 
 void RHIShaderUniformVec4(rhi_shader* Shader, const char* Uniform, hmm_vec4 Value)
 {
-    u32 Location = gl.GetUniformLocation(Shader->Handle, Uniform);
-    gl.Uniform4f(Location, Value.X, Value.Y, Value.Z, Value.W);
+    u32 Location = glGetUniformLocation(Shader->Handle, Uniform);
+    glUniform4f(Location, Value.X, Value.Y, Value.Z, Value.W);
 }
 
 void RHIShaderUniformMat4(rhi_shader* Shader, const char* Uniform, hmm_mat4 Value)
 {
-    u32 Location = gl.GetUniformLocation(Shader->Handle, Uniform);
-    gl.UniformMatrix4fv(Location, 1, GL_FALSE, (const GLfloat*)Value.Elements);
+    u32 Location = glGetUniformLocation(Shader->Handle, Uniform);
+    glUniformMatrix4fv(Location, 1, GL_FALSE, (const GLfloat*)Value.Elements);
 }
 
 void RHIInputLayoutInit(rhi_input_layout* InputLayout)
 {
-    gl.GenVertexArrays(1, &InputLayout->Handle);
+    glGenVertexArrays(1, &InputLayout->Handle);
 }
 
 void RHIInputLayoutFree(rhi_input_layout* InputLayout)
 {
-    gl.DeleteVertexArrays(1, &InputLayout->Handle);
+    glDeleteVertexArrays(1, &InputLayout->Handle);
 }
 
 void RHIInputLayoutBind(rhi_input_layout* InputLayout)
 {
-    gl.BindVertexArray(InputLayout->Handle);
+    glBindVertexArray(InputLayout->Handle);
 }
 
 void RHIInputLayoutAdd(rhi_input_layout* InputLayout, i32 Index, u32 ElementCount, i64 Stride, u64 Offset)
 {
-    gl.BindVertexArray(InputLayout->Handle);
-    gl.EnableVertexAttribArray(Index);
-    gl.VertexAttribPointer(Index, ElementCount, GL_FLOAT, GL_FALSE, Stride, (void*)Offset);
+    glBindVertexArray(InputLayout->Handle);
+    glEnableVertexAttribArray(Index);
+    glVertexAttribPointer(Index, ElementCount, GL_FLOAT, GL_FALSE, Stride, (void*)Offset);
 }
 
 void RHITextureLoad(rhi_texture* Texture, const char* Path)
@@ -186,27 +186,27 @@ void RHITextureLoad(rhi_texture* Texture, const char* Path)
         return;
     }
     
-    gl.GenTextures(1, &Texture->Handle);
-    gl.BindTexture(GL_TEXTURE_2D, Texture->Handle);
+    glGenTextures(1, &Texture->Handle);
+    glBindTexture(GL_TEXTURE_2D, Texture->Handle);
 
-    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    gl.TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Texture->Width, Texture->Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, Data);
-    gl.GenerateMipmap(GL_TEXTURE_2D);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Texture->Width, Texture->Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, Data);
+    glGenerateMipmap(GL_TEXTURE_2D);
 
     free(Data);
 }
 
 void RHITextureFree(rhi_texture* Texture)
 {
-    gl.DeleteTextures(1, &Texture->Handle);
+    glDeleteTextures(1, &Texture->Handle);
 }
 
 void RHITextureBind(rhi_texture* Texture, u32 Slot)
 {
-    gl.ActiveTexture(GL_TEXTURE0 + Slot);
-    gl.BindTexture(GL_TEXTURE_2D, Texture->Handle);
+    glActiveTexture(GL_TEXTURE0 + Slot);
+    glBindTexture(GL_TEXTURE_2D, Texture->Handle);
 }

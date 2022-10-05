@@ -33,6 +33,8 @@ typedef struct rhi_texture {
     i32 Channels;
 } rhi_texture;
 
+void RHIInit();
+
 void RHIBufferInit(rhi_buffer* Buffer, rhi_buffer_usage Usage, u64 Size);
 void RHIBufferFree(rhi_buffer* Buffer);
 void RHIBufferUpload(rhi_buffer* Buffer, u64 Size, const void* Data);

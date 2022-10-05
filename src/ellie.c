@@ -16,8 +16,8 @@ internal game_state GameState;
 global const f32 Vertices[] = {
     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-   -0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 1.0f,   0.0f, 0.0f,
-   -0.5f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 1.0f, 
+   -0.5f, -0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 0.0f,
+   -0.5f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 1.0f
 };
 
 global const u32 Indices[] = {
@@ -57,7 +57,7 @@ void GameUpdate(f32 DeltaTime)
     RHIBufferBind(&GameState.VertexBuffer);
     RHIBufferBind(&GameState.IndexBuffer);
 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 }
 
 void GameExit()

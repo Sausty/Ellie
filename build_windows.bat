@@ -11,9 +11,9 @@ FOR /R %%f in (*.c) do (
 )
 
 SET assembly=Ellie
-SET compilerFlags=-Iext
-SET linkerFlags=user32.lib
+SET compilerFlags=-g -Iext
+SET linkerFlags=-luser32
 SET defines=-D_DEBUG -D_CRT_SECURE_NO_WARNINGS
 
 ECHO "Building game..."
-cl %cFilenames% %compilerFlags% -Febin/%assembly%.exe %defines% /link %linkerFlags%
+clang %cFilenames% %compilerFlags% -o bin/%assembly%.exe %defines% %linkerFlags%

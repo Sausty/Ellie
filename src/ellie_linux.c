@@ -14,7 +14,7 @@
 #include <dlfcn.h>
 
 #include <GL/glx.h>
-#include "ellie_gl.h"
+#include "glad/glad.h"
 
 #include <stdio.h>
 
@@ -226,6 +226,8 @@ int main()
         XCloseDisplay(State.Display);
     }
     
+    RHIInit();
+
     // Init the game
     GameInit();
 
@@ -295,7 +297,7 @@ int main()
             }
         }
 
-        gl.Viewport(0, 0, State.Width, State.Height);
+        glViewport(0, 0, State.Width, State.Height);
         // Update the game
         GameUpdate(0.0f);
         

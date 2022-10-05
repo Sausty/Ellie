@@ -1,10 +1,12 @@
 #include "ellie_common.h"
 #include "ellie_platform.h"
 #include "ellie.h"
+#include "ellie_rhi.h"
 
 #include <stdio.h>
 
 #include "glad/glad.h"
+#include "glad/glad_wgl.h"
 
 #ifdef ELLIE_WINDOWS
 
@@ -36,6 +38,7 @@ typedef struct windows_state {
 } windows_state;
 
 internal windows_state State;
+internal b8 Quit = false;
 
 void OpenDynamicLib(dynamic_library* Library, const char* Path)
 {
@@ -100,14 +103,35 @@ void LoadLibs()
 
 LRESULT CALLBACK EventCallback(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
+    switch (msg)
+    {
+        case WM_CLOSE:
+        case WM_DESTROY:
+        case WM_QUIT:
+        {
+            Quit = true;
+        } break;
+        case WM_SIZE:
+        {
+            RECT r;
+            GetClientRect(hwnd, &r);
+            u32 width = r.right - r.left;
+            u32 height = r.bottom - r.top;
+
+            State.Width = width;
+            State.Height = height;
+        } break;
+    }
+
     return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
 int main()
 {
+    State.Width = 1280;
+    State.Height = 720;
+
     LoadLibs();
-    if (!gladLoadGL())
-        return -1;
 
     HICON icon = LoadIcon(GetModuleHandle(NULL), IDI_APPLICATION);
     
@@ -163,14 +187,34 @@ int main()
     
     SetPixelFormatStub(dc, pixel_format, &pfd);
     
-    HGLRC hglrc = wglCreateContextStub(dc);
+    HGLRC temp = wglCreateContextStub(dc);
+    wglMakeCurrentStub(dc, temp);
+    
+    gladLoadWGL(dc);
+    
+    i32 attribs[] =
+    {
+        WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+        WGL_CONTEXT_MINOR_VERSION_ARB, 5,
+        WGL_CONTEXT_FLAGS_ARB, 0,
+        0
+    };
+    
+    HGLRC hglrc = wglCreateContextAttribsARB(dc, 0, attribs);
+    wglMakeCurrentStub(NULL, NULL);
+    wglDeleteContextStub(temp);
     wglMakeCurrentStub(dc, hglrc);
+
+    gladLoadGL();
 
     b8 should_activate = true;  
     i32 show_window_command_flags = should_activate ? SW_SHOW : SW_SHOWNOACTIVATE;
     ShowWindow(window, show_window_command_flags);
 
-    b8 Quit = false;
+    RHIInit();
+
+    GameInit();
+
     while (!Quit)
     {
         MSG msg;
@@ -187,6 +231,7 @@ int main()
             }
         }
 
+        glViewport(0, 0, State.Width, State.Height);
         GameUpdate(0.0f);
         SwapBuffersStub(dc);
     }

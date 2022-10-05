@@ -19,6 +19,35 @@ GLenum RHIBufferUsageToGL(rhi_buffer_usage Usage)
     return 0;
 }
 
+void OpenGLMessageCallback(u32 source,
+						   u32 type,
+						   u32 id,
+						   u32 severity,
+						   i32 length,
+						   const char* message,
+						   const void* userParam)
+{
+	switch (severity)
+	{
+		case GL_DEBUG_SEVERITY_HIGH:         printf("%s", message); return;
+		case GL_DEBUG_SEVERITY_MEDIUM:       printf("%s", message); return;
+		case GL_DEBUG_SEVERITY_LOW:          printf("%s", message); return;
+        case GL_DEBUG_SEVERITY_NOTIFICATION: printf("%s", message); return;
+	}
+}
+
+void RHIInit()
+{
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	
+    glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	glDebugMessageCallback(OpenGLMessageCallback, NULL);
+	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
+}
+
 void RHIBufferInit(rhi_buffer* Buffer, rhi_buffer_usage Usage, u64 size)
 {
     Buffer->Usage = Usage;

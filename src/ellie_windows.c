@@ -37,8 +37,8 @@ typedef struct windows_state {
     b8 MouseButtons[MouseButton_Max];
 } windows_state;
 
-internal windows_state State;
-internal b8 Quit = false;
+static windows_state State;
+static b8 Quit = false;
 
 void OpenDynamicLib(dynamic_library* Library, const char* Path)
 {

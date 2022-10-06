@@ -76,6 +76,10 @@
 */
 
 
+#include "../ellie_common.h"
+
+#ifdef ELLIE_WINDOWS
+
 #ifndef WINAPI
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1
@@ -1010,6 +1014,8 @@ extern "C" {
 	
 #ifdef __cplusplus
 }
+#endif
+
 #endif
 
 #endif

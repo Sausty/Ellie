@@ -11,16 +11,16 @@ typedef struct game_state {
     rhi_texture Texture;
 } game_state;
 
-internal game_state GameState;
+static game_state GameState;
 
-global const f32 Vertices[] = {
+static const f32 Vertices[] = {
     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
    -0.5f, -0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 0.0f,
    -0.5f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 1.0f
 };
 
-global const u32 Indices[] = {
+static const u32 Indices[] = {
     0, 1, 3,
     1, 2, 3
 };

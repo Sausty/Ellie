@@ -6,20 +6,21 @@
 #include <X11/keysym.h>
 #include <X11/XKBlib.h>  // sudo apt-get install libx11-dev
 #include <X11/Xlib.h>
-#include <X11/Xlib-xcb.h>  // sudo apt-get install libxkbcommon-x11-dev libx11-xcb-dev
+#include <X11/Xlib-xcb.h>
 #include <sys/time.h>
 #include <string.h>
 #include <stdlib.h>
 #include <HandmadeMath.h>
 #include <dlfcn.h>
 
-#include <GL/glx.h>
 #include "glad/glad.h"
+#include <GL/glx.h>
 
 #include <stdio.h>
 
 #include "ellie.h"
 #include "ellie_platform.h"
+#include "ellie_rhi.h"
 
 typedef struct x11_state {
     Display* Display;
@@ -39,11 +40,11 @@ typedef struct x11_state {
     b8 MouseButtons[MouseButton_Max];
 } x11_state;
 
-internal x11_state State;
+static x11_state State;
 
 void OpenDynamicLib(dynamic_library* Library, const char* Path)
 {
-    Library->Handle = dlsym(Path, RTLD_NOW);
+    Library->Handle = dlopen(Path, RTLD_NOW);
 }
 
 void CloseDynamicLib(dynamic_library* Library)
@@ -90,9 +91,6 @@ hmm_vec2 GetMousePosition()
 
 int main()
 {
-    // Load GL
-    LoadGL();
-    
     // Open the display
     State.Display = XOpenDisplay(NULL);
     if (!State.Display)
@@ -200,6 +198,9 @@ int main()
         XCloseDisplay(State.Display);
         return -1;
     }
+
+    if (!gladLoadGL())
+        return -1;
     
     // Change the title
     xcb_change_property(State.Connection, XCB_PROP_MODE_REPLACE, State.Window, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, 5, "Ellie");
@@ -312,7 +313,6 @@ int main()
     glXDestroyContext(State.Display, State.Context);
     xcb_destroy_window(State.Connection, State.Window);
     XCloseDisplay(State.Display);
-    FreeGL();
     printf("Successfully exited the program.\n");
     
     return 0;

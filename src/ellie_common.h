@@ -16,9 +16,6 @@ typedef float f32;
 typedef double f64;
 typedef i8 b8;
 
-#define internal static
-#define global static
-#define local_persist static
 #define false 0
 #define true 1
 
